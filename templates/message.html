@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Message
+{% endblock %}
+
+{% block main %}
+    <form id="messageForm">
+        <div class="form-group">
+            <label for="message">Send Message</label>
+            <textarea class="form-control" id="message" row="3"></textarea>
+        </div>
+        <button type="submit" id="sendMessageButton">Send Message</button>
+    </form>
+    <script src="/static/message.js"></script>
+{% endblock %}
