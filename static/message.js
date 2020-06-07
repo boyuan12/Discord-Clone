@@ -9,13 +9,17 @@ window.onload = function(e) {
     socket.on("connect", () => {
         var button = document.getElementById("sendMessageButton");
         button.onclick = () => {
-            console.log("Clicked")
             var message = document.getElementById("message").value;
-            socket.emit("broadcast message", {"message": message});
+            var room_id = location.pathname.split("/")[location.pathname.split("/").length-1];
+            console.log(room_id)
+            socket.emit("broadcast message", {"message": message, "room_id": room_id});
         }
     });
 
     socket.on("show message", data => {
+        var li = document.createElement("LI");
+        li.textContent = data.message
+        document.getElementById("messages").appendChild(li);
         console.log(data.message);
     });
 

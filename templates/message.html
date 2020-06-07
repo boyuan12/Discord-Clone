@@ -12,5 +12,10 @@
         </div>
         <button type="submit" id="sendMessageButton">Send Message</button>
     </form>
+    <ul id="messages">
+        {% for m in messages %}
+            <li>{{ m[1] }} - {{ m[2] }}</li>
+        {% endfor %}
+    </ul>
     <script src="/static/message.js"></script>
 {% endblock %}
