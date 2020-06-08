@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Message
+{% endblock %}
+
+{% block main %}
+    <form action="/" method="GET">
+        <div class="form-group">
+            <label for="search">Search a Public Room</label>
+            <input type="text" class="form-control" id="search" name="search"></input>
+        </div>
+        <button type="submit">Search</button>
+    </form>
+    <hr>
+    <h3>Results</h3>
+    {% if results|length == 0 %}
+        <h4>No similar room name found, please try again</h4>
+    {% else %}
+        <ul>
+            {% for result in results %}
+                <li><a href="/room/{{ result[0] }}">{{ result[1] }} - {{ result[2] }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

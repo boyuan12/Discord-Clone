@@ -13,8 +13,16 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "secretkey"
 socketio = SocketIO(app)
 
+@app.route("/", methods=["GET"])
+def index():
+    if request.args.get("search"):
+        results = c.execute("SELECT * FROM rooms WHERE name LIKE '%:search%'", {"search": request.form.get("search")}).fetchall()
+        return render_template("searched.html", results=results)
+    else:
+        return render_template("index.html")
+
 @app.route("/room/<string:room_id>")
-def index(room_id):
+def room(room_id):
     room = c.execute("SELECT * FROM rooms WHERE room_id=:r_id", {"r_id": room_id}).fetchall()
 
     if len(room) == 0:
