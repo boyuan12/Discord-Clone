@@ -5,6 +5,14 @@
 {% endblock %}
 
 {% block main %}
+    {% if private == True %}
+        <form method="POST" action="/room/{{ room_id }}">
+            <label for="invite">Invite People to join your private room (seperate by a single comma (,))</label>
+            <textarea class="form-control" id="invite" name="invite" row="3"></textarea>
+            <button type="submit">Submit</button>
+        </form>
+    {% endif %}
+    <br>
     <form id="messageForm">
         <div class="form-group">
             <label for="message">Send Message</label>

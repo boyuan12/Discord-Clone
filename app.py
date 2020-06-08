@@ -21,18 +21,57 @@ def index():
     else:
         return render_template("index.html")
 
-@app.route("/room/<string:room_id>")
+@app.route("/room/<string:room_id>", methods=["GET", "POST"])
+@login_required
 def room(room_id):
-    room = c.execute("SELECT * FROM rooms WHERE room_id=:r_id", {"r_id": room_id}).fetchall()
+    if request.method == "POST":
+        invite = request.form.get("invite").split(",")
+        room = c.execute("SELECT * FROM rooms WHERE room_id=:r_id", {"r_id": room_id}).fetchall()
 
-    if len(room) == 0:
-        return "Room not found"
+        if room[0][3] != "private":
+            return "You can't explicitly invite people unless it's your own private room"
 
-    if room[0][3] == "private":
-        return "private"
+        user = c.execute("SELECT * FROM user_Room WHERE room_id=:r_id AND user_id=:u_id AND role='owner'", {"r_id": room_id, "u_id": session["user_id"]}).fetchall()
 
-    messages = c.execute("SELECT * FROM messages WHERE room=:r_id", {"r_id": room_id})
-    return render_template("message.html", messages=messages)
+        if len(user) == 0:
+            return "You can't explicitly invite people unless it's your own private room"
+
+        for i in invite:
+            user_id = c.execute("SELECT * FROM users WHERE email=:val OR username=:val", {"val": i}).fetchall()
+
+            if len(user_id) == 0:
+                return f"{i} not found"
+
+            c.execute("INSERT INTO user_room (user_id, room_id, role) VALUES (:u_id, :r_id, 'user')", {"u_id": user_id[0][0], "r_id": room_id})
+            conn.commit()
+
+        return "successfully invited all people on your list!"
+
+    else:
+        private = False
+        room = c.execute("SELECT * FROM rooms WHERE room_id=:r_id", {"r_id": room_id}).fetchall()
+
+        if len(room) == 0:
+            return "Room not found"
+
+        if room[0][3] == "private":
+            access = c.execute("SELECT * FROM user_room WHERE user_id=:u_id AND room_id=:r_id", {"u_id": session.get("user_id"), "r_id": room_id}).fetchall()
+
+            if len(access) == 0:
+                return "404"
+
+            private = True
+
+        if len(c.execute("SELECT * FROM user_room WHERE room_id=:r_id and user_id=:u_id", {"r_id": room_id, "u_id": session.get("user_id")}).fetchall()) == 0:
+            c.execute("INSERT INTO user_room (user_id, room_id, role) VALUES (:u_id, :r_id, 'user')", {"r_id": room_id, "u_id": session.get("user_id")})
+            conn.commit()
+            username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session.get("user_id")}).fetchall()[0][0]
+            c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": f"Welcome {username}!", "a": "Bot", "r": room_id, "t": timestamp()})
+            conn.commit()
+            socketio.emit("show message", {"message": f"Welcome {username}!"}, broadcast=True)
+
+        messages = c.execute("SELECT * FROM messages WHERE room=:r_id", {"r_id": room_id})
+        return render_template("message.html", messages=messages, private=private, room_id=room_id)
 
 
 @socketio.on("broadcast message")
@@ -123,6 +162,12 @@ def create_room():
                 c.execute("INSERT INTO rooms (room_id, name, description, status) VALUES (:r_id, :name, :desc, :status)", {"r_id": room_id, "name": request.form.get("name"), "desc": request.form.get("description"), "status": request.form.get('status')})
                 conn.commit()
                 break
+        c.execute("INSERT INTO user_room (user_id, room_id, role) VALUES (:u_id, :r_id, 'owner')", {"r_id": room_id, "u_id": session.get("user_id")})
+        conn.commit()
+        username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session.get("user_id")}).fetchall()[0][0]
+        c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": f"Welcome {username}!", "a": "Bot", "r": room_id, "t": timestamp()})
+        conn.commit()
+        socketio.emit("show message", {"message": f"Welcome {username}!"}, broadcast=True)
         return redirect(f"/room/{room_id}")
     else:
         return render_template("create-room.html")
