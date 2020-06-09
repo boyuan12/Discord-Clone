@@ -17,12 +17,12 @@ window.onload = function(e) {
     });
 
     socket.on("show message", data => {
-        var li = document.createElement("LI");
-        li.textContent = data.message
-        document.getElementById("messages").appendChild(li);
-        console.log(data.message);
+        if (data["room_id"] == location.pathname.split("/")[location.pathname.split("/").length-1]) {
+            var li = document.createElement("LI");
+            li.textContent = data.message
+            document.getElementById("messages").appendChild(li);
+        }
     });
-
 }
 
 

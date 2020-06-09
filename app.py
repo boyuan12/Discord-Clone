@@ -16,7 +16,7 @@ socketio = SocketIO(app)
 @app.route("/", methods=["GET"])
 def index():
     if request.args.get("search"):
-        results = c.execute("SELECT * FROM rooms WHERE name LIKE '%:search%'", {"search": request.form.get("search")}).fetchall()
+        results = c.execute(f"SELECT * FROM rooms WHERE name LIKE '%{request.args.get('search')}%'").fetchall()
         return render_template("searched.html", results=results)
     else:
         return render_template("index.html")
@@ -83,7 +83,7 @@ def message_display(data):
         user = "unknown"
     c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": data["message"], "a": user, "r": data["room_id"], "t": ts})
     conn.commit()
-    emit("show message", {"message": data["message"]}, broadcast=True)
+    emit("show message", {"message": data["message"], "room_id": data["room_id"]}, broadcast=True)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -171,7 +171,6 @@ def create_room():
         return redirect(f"/room/{room_id}")
     else:
         return render_template("create-room.html")
-
 
 
 if __name__ == "__main__":

@@ -5,25 +5,31 @@
 {% endblock %}
 
 {% block main %}
-    {% if private == True %}
-        <form method="POST" action="/room/{{ room_id }}">
-            <label for="invite">Invite People to join your private room (seperate by a single comma (,))</label>
-            <textarea class="form-control" id="invite" name="invite" row="3"></textarea>
-            <button type="submit">Submit</button>
-        </form>
-    {% endif %}
-    <br>
-    <form id="messageForm">
-        <div class="form-group">
-            <label for="message">Send Message</label>
-            <textarea class="form-control" id="message" row="3"></textarea>
+    <div class="row">
+        <div class="col-9">
+            {% if private == True %}
+                <form method="POST" action="/room/{{ room_id }}">
+                    <label for="invite">Invite People to join your private room (seperate by a single comma (,))</label>
+                    <textarea class="form-control" id="invite" name="invite" row="3"></textarea>
+                    <button type="submit">Submit</button>
+                </form>
+            {% endif %}
+            <br>
+            <form id="messageForm">
+                <div class="form-group">
+                    <label for="message">Send Message</label>
+                    <textarea class="form-control" id="message" row="3"></textarea>
+                </div>
+                <button type="submit" id="sendMessageButton">Send Message</button>
+            </form>
+            <ul id="messages">
+                {% for m in messages %}
+                    <li>{{ m[1] }} - {{ m[2] }}</li>
+                {% endfor %}
+            </ul>
+            <script src="/static/message.js"></script>
         </div>
-        <button type="submit" id="sendMessageButton">Send Message</button>
-    </form>
-    <ul id="messages">
-        {% for m in messages %}
-            <li>{{ m[1] }} - {{ m[2] }}</li>
-        {% endfor %}
-    </ul>
-    <script src="/static/message.js"></script>
+        <div class="col-3">
+        </div>
+    </div>
 {% endblock %}
