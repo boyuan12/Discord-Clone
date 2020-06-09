@@ -70,8 +70,13 @@ def room(room_id):
             conn.commit()
             socketio.emit("show message", {"message": f"Welcome {username}!"}, broadcast=True)
 
-        messages = c.execute("SELECT * FROM messages WHERE room=:r_id", {"r_id": room_id})
-        return render_template("message.html", messages=messages, private=private, room_id=room_id)
+        messages = c.execute("SELECT * FROM messages WHERE room=:r_id", {"r_id": room_id}).fetchall()
+        users = c.execute("SELECT * FROM user_room WHERE room_id=:r_id", {"r_id": room_id}).fetchall()
+        usernames = []
+        for user in users:
+            username = c.execute("SELECT username FROM users WHERE user_id=:u_id", {"u_id": user[0]}).fetchall()[0][0]
+            usernames.append(username)
+        return render_template("message.html", messages=messages, private=private, room_id=room_id, users=usernames)
 
 
 @socketio.on("broadcast message")
@@ -83,7 +88,7 @@ def message_display(data):
         user = "unknown"
     c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": data["message"], "a": user, "r": data["room_id"], "t": ts})
     conn.commit()
-    emit("show message", {"message": data["message"], "room_id": data["room_id"]}, broadcast=True)
+    emit("show message", {"message": data["message"],"timestamp": ts, "name": user, "room_id": data["room_id"]}, broadcast=True)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -172,6 +177,17 @@ def create_room():
     else:
         return render_template("create-room.html")
 
+
+@socketio.on("disconnect")
+def exist():
+    print(session.get("user_id"), "disconnected!")
+    username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
+    emit("update status", {"user": username, "status": "offline"}, broadcast=True)
+
+@socketio.on("connect")
+def connect():
+    username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
+    emit("update status", {"user": username, "status": "online"}, broadcast=True)
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=2000, debug=True)

@@ -22,14 +22,18 @@
                 </div>
                 <button type="submit" id="sendMessageButton">Send Message</button>
             </form>
-            <ul id="messages">
+            <div class="container">
                 {% for m in messages %}
-                    <li>{{ m[1] }} - {{ m[2] }}</li>
+                    <small>{{ m[4] }}</small><h4>{{ m[1] }}:</h4><p>{{ m[2] }}</p>
                 {% endfor %}
-            </ul>
+            </div>
             <script src="/static/message.js"></script>
         </div>
         <div class="col-3">
+            <h1>Users</h1>
+            {% for user in users %}
+                <span>{{ user }}</span>  <span id="{{ user }}">offline</span> <br>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

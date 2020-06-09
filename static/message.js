@@ -14,15 +14,19 @@ window.onload = function(e) {
             console.log(room_id)
             socket.emit("broadcast message", {"message": message, "room_id": room_id});
         }
+        // emit("update status online")
     });
 
     socket.on("show message", data => {
         if (data["room_id"] == location.pathname.split("/")[location.pathname.split("/").length-1]) {
-            var li = document.createElement("LI");
-            li.textContent = data.message
-            document.getElementById("messages").appendChild(li);
+            $(".container").append(`<small>${data.timestamp}</small><h4>${data.name}:</h4><p>${data.message}</p>`);
         }
     });
+
+    socket.on("update status", data => {
+        console.log("status updated")
+        document.getElementById(data["user"]).innerHTML = data["status"]
+    })
 }
 
 
