@@ -1,6 +1,6 @@
 import sqlite3
 
-from flask import Flask, render_template, request, url_for, redirect, session
+from flask import Flask, render_template, request, url_for, redirect, session, jsonify
 from flask_socketio import SocketIO, emit
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -12,6 +12,8 @@ c = conn.cursor()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secretkey"
 socketio = SocketIO(app)
+
+users = set()
 
 @app.route("/", methods=["GET"])
 def index():
@@ -68,7 +70,8 @@ def room(room_id):
             username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session.get("user_id")}).fetchall()[0][0]
             c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": f"Welcome {username}!", "a": "Bot", "r": room_id, "t": timestamp()})
             conn.commit()
-            socketio.emit("show message", {"message": f"Welcome {username}!"}, broadcast=True)
+            socketio.emit("new people joined", {"message": f"Welcome {username}!", "room": room_id}, broadcast=True)
+            # socketio.emit("show message", {"message": f"Welcome {username}!"}, broadcast=True)
 
         messages = c.execute("SELECT * FROM messages WHERE room=:r_id", {"r_id": room_id}).fetchall()
         users = c.execute("SELECT * FROM user_room WHERE room_id=:r_id", {"r_id": room_id}).fetchall()
@@ -172,7 +175,7 @@ def create_room():
         username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session.get("user_id")}).fetchall()[0][0]
         c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": f"Welcome {username}!", "a": "Bot", "r": room_id, "t": timestamp()})
         conn.commit()
-        socketio.emit("show message", {"message": f"Welcome {username}!"}, broadcast=True)
+        socketio.emit("new people joined", {"message": f"Welcome {username}!", "room": room_id}, broadcast=True)
         return redirect(f"/room/{room_id}")
     else:
         return render_template("create-room.html")
@@ -182,12 +185,21 @@ def create_room():
 def exist():
     print(session.get("user_id"), "disconnected!")
     username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
+    users.discard(username)
     emit("update status", {"user": username, "status": "offline"}, broadcast=True)
 
 @socketio.on("connect")
 def connect():
+    print(str(session.get("user_id")) + " connected!")
     username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
+    users.add(username)
     emit("update status", {"user": username, "status": "online"}, broadcast=True)
+
+
+@app.route("/api")
+def api():
+    return jsonify(users=list(users))
+
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=2000, debug=True)
