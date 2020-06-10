@@ -11,8 +11,14 @@ window.onload = function(e) {
             console.log(data)
             for(let i=0; i<data["users"].length; i++) {
                 console.log(data["users"][i])
-                document.getElementById(data["users"][i]).innerHTML = "online";
-                document.getElementById(data["users"][i]).setAttribute("style", "color: green;")
+                try {
+                    document.getElementById(data["users"][i]).innerHTML = "online";
+                    document.getElementById(data["users"][i]).setAttribute("style", "color: green;")
+                } catch(err) {
+                    var span = document.createElement("SPAN");
+                    span.innerHTML = `<span id=${data["users"][i]} style="color: green;">online</span>`
+                    document.getElementById("users").appendChild(span);
+                }
             }
       })
 
@@ -52,6 +58,7 @@ window.onload = function(e) {
     });
 
     socket.on("new people joined", data => {
+        console.log("hi")
         var room_id = location.pathname.split("/")[location.pathname.split("/").length-1];
         if (room_id === data["room_id"]) {
             $(".container").append(`<small>${data.timestamp}</small><h4>${data.name}:</h4><p>${data.message}</p>`);

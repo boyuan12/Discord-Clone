@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Direct Message/Private Message
+{% endblock %}
+
+{% block main %}
+    <h1>Send a message</h1>
+    <form id="messageForm">
+        <input type="hidden" id="sender" value="{{ username }}">
+        <label for="invite">Send a DM to your friend!</label>
+        <input type="text" id="username">
+        <textarea class="form-control" id="message" row="3" placeholder="message"></textarea>
+        <button type="submit" id="dmButton">Send the Message</button>
+    </form>
+    <h1>All Messages Received:</h1>
+    <ul id="messages">
+        {% for message in messages %}
+
+        {% endfor %}
+    </ul>
+    <script src="/static/private.js"></script>
+{% endblock %}

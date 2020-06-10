@@ -35,10 +35,10 @@
             </form>
             <script src="/static/message.js"></script>
         </div>
-        <div class="col-3">
+        <div class="col-3" id="users">
             <h1>Users</h1>
             {% for user in users %}
-                <span>{{ user }}</span>  <span id="{{ user }}">offline</span> <br>
+                <span>{{ user }} <span id="{{ user }}" style="color: gray;">offline</span> </span> <br>
             {% endfor %}
         </div>
     </div>

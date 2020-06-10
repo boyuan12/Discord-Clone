@@ -201,5 +201,24 @@ def api():
     return jsonify(users=list(users))
 
 
+@app.route("/dm", methods=["GET"])
+@login_required
+def dm():
+    messages = c.execute("SELECT * FROM messages WHERE room=:room", {"room": f"user-{session.get('user_id')}"}).fetchall()
+    username = c.execute("SELECT username FROM users WHERE user_id=:u_id", {"u_id": session["user_id"]}).fetchall()[0][0]
+
+    return render_template("dm.html", messages=messages, username=username)
+
+@socketio.on("dm")
+def dm(data):
+    print("hi")
+    ts = timestamp()
+    user_id = c.execute("SELECT * FROM users WHERE username=:name", {"name": data["username"]}).fetchall()[0][0]
+
+    c.execute("INSERT INTO messages (author, message, room, timestamp) VALUES (:a, :m, :r, :t)", {"a": data["author"], "m": data["message"], "r": f"user-{user_id}", "t": ts})
+    conn.commit()
+
+    emit("broadcast dm", {"author": data["author"], "receiver": data["username"], "t": ts, "message": data["message"]})
+
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=2000, debug=True)
