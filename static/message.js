@@ -1,27 +1,5 @@
 window.onload = function(e) {
 
-    fetch('http://discord-clone-flask.herokuapp.com/api', {
-        method: 'GET', // or 'PUT'
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      .then(response => response.json())
-      .then(data => {
-            console.log(data)
-            for(let i=0; i<data["users"].length; i++) {
-                console.log(data["users"][i])
-                try {
-                    document.getElementById(data["users"][i]).innerHTML = "online";
-                    document.getElementById(data["users"][i]).setAttribute("style", "color: green;")
-                } catch(err) {
-                    var span = document.createElement("SPAN");
-                    span.innerHTML = `<span id=${data["users"][i]} style="color: green;">online</span>`
-                    document.getElementById("users").appendChild(span);
-                }
-            }
-      })
-
     $("#messageForm").submit(function(e) {
         e.preventDefault();
     });
@@ -73,7 +51,29 @@ window.onload = function(e) {
             window.scrollTo(0, document.getElementById("messages").scrollHeight);
             window.location.reload(true);
         }
+    });
+
+    fetch('http://discord-clone-flask.herokuapp.com/api', {
+        method: 'GET', // or 'PUT'
+        headers: {
+          'Content-Type': 'application/json',
+        },
     })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data)
+        for(let i=0; i<data["users"].length; i++) {
+            console.log(data["users"][i])
+            try {
+                document.getElementById(data["users"][i]).innerHTML = "online";
+                document.getElementById(data["users"][i]).setAttribute("style", "color: green;")
+            } catch(err) {
+                var span = document.createElement("SPAN");
+                span.innerHTML = `<span id=${data["users"][i]} style="color: green;">online</span>`
+                document.getElementById("users").appendChild(span);
+            }
+        }
+      })
 }
 
 
