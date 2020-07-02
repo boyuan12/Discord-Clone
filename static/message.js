@@ -69,7 +69,7 @@ window.onload = function(e) {
                 document.getElementById(data["users"][i]).setAttribute("style", "color: green;")
             } catch(err) {
                 var span = document.createElement("SPAN");
-                span.innerHTML = `<span id=${data["users"][i]} style="color: green;">online</span>`
+                span.innerHTML = `${data["users"][i]} <span id=${data["users"][i]} style="color: green;">online</span>`
                 document.getElementById("users").appendChild(span);
             }
         }
