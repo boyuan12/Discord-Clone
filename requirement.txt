@@ -1,2 +1,7 @@
 Flask-SocketIO
 Flask
+gevent==1.4.0
+gevent-websocket==0.10.1
+greenlet==0.4.15
+python-engineio==3.5.1
+python-socketio==3.1.2

@@ -3,6 +3,7 @@ import sqlite3
 from flask import Flask, render_template, request, url_for, redirect, session, jsonify
 from flask_socketio import SocketIO, emit
 from werkzeug.security import check_password_hash, generate_password_hash
+from termcolor import colored
 
 from helper import *
 
@@ -70,6 +71,7 @@ def room(room_id):
             username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session.get("user_id")}).fetchall()[0][0]
             c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": f"Welcome {username}!", "a": "Bot", "r": room_id, "t": timestamp()})
             conn.commit()
+            print(colored(room_id, "red"))
             socketio.emit("new people joined", {"message": f"Welcome {username}!", "room": room_id}, broadcast=True)
             # socketio.emit("show message", {"message": f"Welcome {username}!"}, broadcast=True)
 
@@ -210,8 +212,7 @@ def dm():
     return render_template("dm.html", messages=messages, username=username)
 
 @socketio.on("dm")
-def dm(data):
-    print("hi")
+def dm_socket(data):
     ts = timestamp()
     user_id = c.execute("SELECT * FROM users WHERE username=:name", {"name": data["username"]}).fetchall()[0][0]
 
