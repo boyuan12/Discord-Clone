@@ -55,7 +55,8 @@ window.onload = function(e) {
     socket.on("show message", data => {
         if (data["room_id"] == location.pathname.split("/")[location.pathname.split("/").length-1]) {
             $(".container").append(`<small>${data.timestamp}</small><h4>${data.name}:</h4><p>${data.message}</p>`);
-            window.scrollTo(0, document.getElementById("messages").scrollHeight);
+            var objDiv = document.getElementById("messages");
+            objDiv.scrollTop = objDiv.scrollHeight;
         }
     });
 
@@ -71,6 +72,8 @@ window.onload = function(e) {
                     SPAN.innerHTML = `${data["user"]} <span id="${data['user']}" style="color: green;">online</span>`
                     document.getElementById("users").appendChild(SPAN);
                     $(".container").append(`<small>${timestamp()}</small><h4>Bot:</h4><p>Welcome ${data["user"]}</p>`);
+                    var objDiv = document.getElementById("messages");
+                    objDiv.scrollTop = objDiv.scrollHeight;
                 }
             }
         } else {
@@ -85,8 +88,8 @@ window.onload = function(e) {
         console.log(room_id)
         if (room_id === data["room_id"]) {
             $(".container").append(`<small>${data.timestamp}</small><h4>${data.name}:</h4><p>${data.message}</p>`);
-            window.scrollTo(0, document.getElementById("messages").scrollHeight);
-            window.location.reload(true);
+            var objDiv = document.getElementById("messages");
+            objDiv.scrollTop = objDiv.scrollHeight;
         }
     });
 
