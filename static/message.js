@@ -1,5 +1,40 @@
 window.onload = function(e) {
 
+    function timestamp() {
+        var str = ""
+        const date = new Date();
+        const months = {
+            0: "Jan",
+            1: "Feb",
+            2: "Mar",
+            3: "Apr",
+            4: "May",
+            5: "Jun",
+            6: "Jul",
+            7: "Aug",
+            8: "Sep",
+            9: "Oct",
+            10: "Nov",
+            11: "Dec"
+        };
+        str += months[date.getMonth()] + "-"; // add month
+        var day = date.getDate();
+        if (day < 10) {
+            day = "0" + day.toString();
+        }
+        str += day + "-"
+        str += date.getFullYear() + " ("
+        str += date.getHours() + ":";
+        var min = date.getMinutes();
+        if (date.getMinutes() < 10) {
+            min = "0" + min.toString();
+        }
+        str += min + ")"
+        return str
+    }
+
+    var room_id = location.pathname.split("/")[location.pathname.split("/").length-1];
+
     $("#messageForm").submit(function(e) {
         e.preventDefault();
     });
@@ -11,7 +46,6 @@ window.onload = function(e) {
         button.onclick = () => {
             var message = document.getElementById("message").value;
             document.getElementById("message").value = " ";
-            var room_id = location.pathname.split("/")[location.pathname.split("/").length-1];
             console.log(room_id)
             socket.emit("broadcast message", {"message": message, "room_id": room_id});
         }
@@ -28,13 +62,16 @@ window.onload = function(e) {
     socket.on("update status", data => {
         console.log("status updated")
         if (data["status"] == "online") {
-            try {
-                document.getElementById(data["user"]).setAttribute("style", "color: green;");
-            } catch (err) {
-                var SPAN = document.createElement("SPAN");
-                // SPAN.setAttribute("id", data["user"]);
-                SPAN.innerHTML = `${data["user"]} <span id="${data['user']}" style="color: green;">online</span>`
-                document.getElementById("users").appendChild(SPAN);
+            if (data["room_id"].includes(room_id)) {
+                try {
+                    document.getElementById(data["user"]).setAttribute("style", "color: green;");
+                } catch (err) {
+                    var SPAN = document.createElement("SPAN");
+                    // SPAN.setAttribute("id", data["user"]);
+                    SPAN.innerHTML = `${data["user"]} <span id="${data['user']}" style="color: green;">online</span>`
+                    document.getElementById("users").appendChild(SPAN);
+                    $(".container").append(`<small>${timestamp()}</small><h4>Bot:</h4><p>Welcome ${data["user"]}</p>`);
+                }
             }
         } else {
             document.getElementById(data["user"]).setAttribute("style", "color: gray;")
@@ -53,7 +90,7 @@ window.onload = function(e) {
         }
     });
 
-    fetch('http://discord-clone-flask.herokuapp.com/api', {
+    fetch(`http://0.0.0.0:2000/api?room_id=${room_id}`, {
         method: 'GET', // or 'PUT'
         headers: {
           'Content-Type': 'application/json',

@@ -1,14 +1,24 @@
 import sqlite3
+import os
 
 from flask import Flask, render_template, request, url_for, redirect, session, jsonify
 from flask_socketio import SocketIO, emit
 from werkzeug.security import check_password_hash, generate_password_hash
 from termcolor import colored
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
-from helper import *
+from helpers import *
 
-conn = sqlite3.connect("db.sqlite3", check_same_thread=False)
-c = conn.cursor()
+if not os.getenv('DATABASE_URL'):
+    conn = sqlite3.connect("db.sqlite3", check_same_thread=False)
+    c = conn.cursor()
+else:
+    engine = create_engine(os.getenv("DATABASE_URL"))
+    db = scoped_session(sessionmaker(bind=engine))
+    conn = db()
+    c = conn
+
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secretkey"
@@ -17,6 +27,7 @@ socketio = SocketIO(app)
 users = set()
 
 @app.route("/", methods=["GET"])
+@login_required
 def index():
     if request.args.get("search"):
         results = c.execute(f"SELECT * FROM rooms WHERE name LIKE '%{request.args.get('search')}%'").fetchall()
@@ -156,6 +167,7 @@ def login():
 
 
 @app.route("/logout")
+@login_required
 def logout():
     session.clear()
     return redirect(url_for("login"))
@@ -195,12 +207,23 @@ def connect():
     print(str(session.get("user_id")) + " connected!")
     username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
     users.add(username)
-    emit("update status", {"user": username, "status": "online"}, broadcast=True)
+    room = []
+    rooms = c.execute("SELECT room_id FROM user_room WHERE user_id=:u_id", {"u_id": session.get("user_id")}).fetchall()
+    for r in rooms:
+        room.append(r[0])
+    emit("update status", {"user": username, "status": "online", "room_id": room}, broadcast=True)
 
 
 @app.route("/api")
 def api():
-    return jsonify(users=list(users))
+    room_id = request.args.get("room_id")
+    user = []
+    for i in users:
+        u_id = c.execute("SELECT user_id FROM users WHERE username=:u", {"u": i}).fetchall()[0][0]
+        print(u_id)
+        if len(c.execute("SELECT room_id FROM user_room WHERE user_id=:u_id AND room_id=:r_id", {"u_id": u_id, "r_id": room_id}).fetchall()) != 0:
+            user.append(i)
+    return jsonify(users=user)
 
 
 @app.route("/dm", methods=["GET"])
