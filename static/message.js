@@ -90,7 +90,7 @@ window.onload = function(e) {
         }
     });
 
-    fetch(`http://0.0.0.0:2000/api?room_id=${room_id}`, {
+    fetch(`http://discord-clone-flask.herokuapp.com/api?room_id=${room_id}`, {
         method: 'GET', // or 'PUT'
         headers: {
           'Content-Type': 'application/json',
