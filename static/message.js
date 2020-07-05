@@ -3,7 +3,7 @@ window.onload = function(e) {
     // var offset = new Date().getTimezoneOffset();
     // console.log(offset);
 
-    const BASE_URL = "http://discord-clone-flask.herokuapp.com"
+    const BASE_URL = "http://0.0.0.0:2000"
 
     function timestamp() {
 
@@ -112,7 +112,17 @@ window.onload = function(e) {
                 }
             }
         } else {
-            document.getElementById(data["user"]).setAttribute("style", "color: gray;")
+            try {
+                document.getElementById(data["user"]).setAttribute("style", "color: gray;");
+            } catch(err) {
+                var SPAN = document.createElement("SPAN");
+                // SPAN.setAttribute("id", data["user"]);
+                SPAN.innerHTML = `${data["user"]} <span id="${data['user']}" style="color: green;">online</span>`
+                document.getElementById("users").appendChild(SPAN);
+                // $(".container").append(`<small>${utcToLocal(timestamp())}</small><h4>Bot:</h4><p>Welcome ${data["user"]}</p>`);
+                var objDiv = document.getElementById("messages");
+                objDiv.scrollTop = objDiv.scrollHeight;
+            }
         }
         document.getElementById(data["user"]).innerHTML = data["status"];
     });
