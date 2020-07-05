@@ -1,8 +1,12 @@
 window.onload = function(e) {
 
+    // var offset = new Date().getTimezoneOffset();
+    // console.log(offset);
+
+    const BASE_URL = "http://discord-clone-flask.herokuapp.com"
+
     function timestamp() {
-        var str = ""
-        const date = new Date();
+
         const months = {
             0: "Jan",
             1: "Feb",
@@ -17,6 +21,9 @@ window.onload = function(e) {
             10: "Nov",
             11: "Dec"
         };
+
+        var str = ""
+        const date = new Date();
         str += months[date.getMonth()] + "-"; // add month
         var day = date.getDate();
         if (day < 10) {
@@ -31,6 +38,32 @@ window.onload = function(e) {
         }
         str += min + ")"
         return str
+    }
+
+    function utcToLocal(ts) {
+        const months = {
+            "Jan": "01",
+            "Feb": "02",
+            "Mar": "03",
+            "Apr": "04",
+            "May": "05",
+            "Jun": "06",
+            "Jul": "07",
+            "Aug": "08",
+            "Sep": "09",
+            "Oct": "10",
+            "Nov": "11",
+            "Dec": "12"
+        }
+        var ts = ts.split("-");
+        var year = ts[2].split(" (")
+        var utc = `${year[0]}-${months[ts[0]]}-${ts[1]}T${year[1].split(")")[0]}:00.000Z`;
+        var localDate = new Date(utc);
+        var localDate = localDate.toString().split("GMT-")[0];
+
+        var t = localDate.toString().split(" ")
+        var messages = `${t[1]}-${t[2]}-${t[3]} (${t[4].split(":")[0]}:${t[4].split(":")[1]})`
+        return messages;
     }
 
     var room_id = location.pathname.split("/")[location.pathname.split("/").length-1];
@@ -54,7 +87,9 @@ window.onload = function(e) {
 
     socket.on("show message", data => {
         if (data["room_id"] == location.pathname.split("/")[location.pathname.split("/").length-1]) {
-            $(".container").append(`<small>${data.timestamp}</small><h4>${data.name}:</h4><p>${data.message}</p>`);
+            var message = document.createElement("SPAN");
+            message.innerHTML = `<small>${utcToLocal(data.timestamp)}</small><h4>${data.name}:</h4><p>${data.message}</p>`
+            $(".container").append(message);
             var objDiv = document.getElementById("messages");
             objDiv.scrollTop = objDiv.scrollHeight;
         }
@@ -71,7 +106,7 @@ window.onload = function(e) {
                     // SPAN.setAttribute("id", data["user"]);
                     SPAN.innerHTML = `${data["user"]} <span id="${data['user']}" style="color: green;">online</span>`
                     document.getElementById("users").appendChild(SPAN);
-                    $(".container").append(`<small>${timestamp()}</small><h4>Bot:</h4><p>Welcome ${data["user"]}</p>`);
+                    $(".container").append(`<small>${utcToLocal(timestamp())}</small><h4>Bot:</h4><p>Welcome ${data["user"]}</p>`);
                     var objDiv = document.getElementById("messages");
                     objDiv.scrollTop = objDiv.scrollHeight;
                 }
@@ -87,13 +122,13 @@ window.onload = function(e) {
         var room_id = location.pathname.split("/")[location.pathname.split("/").length-1];
         console.log(room_id)
         if (room_id === data["room_id"]) {
-            $(".container").append(`<small>${data.timestamp}</small><h4>${data.name}:</h4><p>${data.message}</p>`);
+            $(".container").append(`<small>${utcToLocal(data.timestamp)}</small><h4>${data.name}:</h4><p>${data.message}</p>`);
             var objDiv = document.getElementById("messages");
             objDiv.scrollTop = objDiv.scrollHeight;
         }
     });
 
-    fetch(`http://discord-clone-flask.herokuapp.com/api?room_id=${room_id}`, {
+    fetch(`${BASE_URL}/api?room_id=${room_id}&api=users`, {
         method: 'GET', // or 'PUT'
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +148,22 @@ window.onload = function(e) {
                 document.getElementById("users").appendChild(span);
             }
         }
-      })
+      });
+
+    fetch(`${BASE_URL}/api?room_id=${room_id}&api=messages`, {
+        method: "GET",
+        headers: {
+            "Content-Type": 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        for (let i=0; i<data.messages.length; i++) {
+            var message = document.createElement("SPAN");
+            message.innerHTML = `<small>${utcToLocal(data["messages"][i].timestamp)}</small><h4>${data["messages"][i].author}:</h4><p>${data["messages"][i].message}</p>`
+            $(".container").append(message);
+        };
+    })
 }
 
 

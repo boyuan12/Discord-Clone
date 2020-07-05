@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, url_for, redirect, session, j
 from flask_socketio import SocketIO, emit
 from werkzeug.security import check_password_hash, generate_password_hash
 from termcolor import colored
+from markdown import markdown
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -102,9 +103,16 @@ def message_display(data):
         user = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
     else:
         user = "unknown"
-    c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": data["message"], "a": user, "r": data["room_id"], "t": ts})
+    messages = data["message"].split("\n")
+    markdowns = []
+    for m in messages:
+        markdowns.append(markdown(m))
+    markdowns = "<br>".join(markdowns)
+    # print(markdowns)
+    c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": markdowns, "a": user, "r": data["room_id"], "t": ts})
+    print(ts)
     conn.commit()
-    emit("show message", {"message": data["message"],"timestamp": ts, "name": user, "room_id": data["room_id"]}, broadcast=True)
+    emit("show message", {"message": markdowns, "timestamp": ts, "name": user, "room_id": data["room_id"]}, broadcast=True)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -202,6 +210,7 @@ def exist():
     users.discard(username)
     emit("update status", {"user": username, "status": "offline"}, broadcast=True)
 
+
 @socketio.on("connect")
 def connect():
     print(str(session.get("user_id")) + " connected!")
@@ -216,14 +225,23 @@ def connect():
 
 @app.route("/api")
 def api():
-    room_id = request.args.get("room_id")
-    user = []
-    for i in users:
-        u_id = c.execute("SELECT user_id FROM users WHERE username=:u", {"u": i}).fetchall()[0][0]
-        print(u_id)
-        if len(c.execute("SELECT room_id FROM user_room WHERE user_id=:u_id AND room_id=:r_id", {"u_id": u_id, "r_id": room_id}).fetchall()) != 0:
-            user.append(i)
-    return jsonify(users=user)
+    if request.args.get("api") == "users":
+        room_id = request.args.get("room_id")
+        user = []
+        for i in users:
+            u_id = c.execute("SELECT user_id FROM users WHERE username=:u", {"u": i}).fetchall()[0][0]
+            print(u_id)
+            if len(c.execute("SELECT room_id FROM user_room WHERE user_id=:u_id AND room_id=:r_id", {"u_id": u_id, "r_id": room_id}).fetchall()) != 0:
+                user.append(i)
+        return jsonify(users=user)
+
+    elif request.args.get("api") == "messages":
+        room_id = request.args.get("room_id")
+        messages = []
+        dbms = c.execute("SELECT * FROM messages WHERE room=:r_id", {"r_id": room_id}).fetchall()
+        for d in dbms:
+            messages.append({"author": d[1], "message": d[2], "timestamp": d[4]})
+        return jsonify(messages=messages)
 
 
 @app.route("/dm", methods=["GET"])
