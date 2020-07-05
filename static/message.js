@@ -3,7 +3,7 @@ window.onload = function(e) {
     // var offset = new Date().getTimezoneOffset();
     // console.log(offset);
 
-    const BASE_URL = "http://0.0.0.0:2000"
+    const BASE_URL = "http://discord-clone-flask.herokuapp.com/"
 
     function timestamp() {
 
