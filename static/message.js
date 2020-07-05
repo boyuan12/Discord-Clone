@@ -104,9 +104,9 @@ window.onload = function(e) {
                 } catch (err) {
                     var SPAN = document.createElement("SPAN");
                     // SPAN.setAttribute("id", data["user"]);
-                    SPAN.innerHTML = `${data["user"]} <span id="${data['user']}" style="color: green;">online</span>`
+                    SPAN.innerHTML = `${data["user"]} <span id="${data['user']}" style="color: green;">online</span> <br>`
                     document.getElementById("users").appendChild(SPAN);
-                    $(".container").append(`<small>${utcToLocal(timestamp())}</small><h4>Bot:</h4><p>Welcome ${data["user"]}</p><br>`);
+                    $(".container").append(`<small>${utcToLocal(timestamp())}</small><h4>Bot:</h4><p>Welcome ${data["user"]}</p>`);
                     var objDiv = document.getElementById("messages");
                     objDiv.scrollTop = objDiv.scrollHeight;
                 }
