@@ -5,15 +5,32 @@
 {% endblock %}
 
 {% block main %}
+    <style>
+
+        form {
+            margin-left: 200px;
+            margin-right: 200px;
+            margin-top: 200px;
+        }
+
+        #link {
+            margin-left: 200px;
+        }
+
+    </style>
     <form action="/login" method="POST">
         <div class="form-group">
             <label for="exampleInputEmail1">Email address / Username</label>
-            <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="username">
+            <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="username" required>
+            <small style="color: red;">{{ message1 }}</small>
         </div>
         <div class="form-group">
             <label for="exampleInputPassword1">Password</label>
-            <input type="password" class="form-control" id="exampleInputPassword1" name="password">
+            <input type="password" class="form-control" id="exampleInputPassword1" name="password" required>
+            <small style="color: red;">{{ message2 }}</small>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
+    <br>
+    <small id="link"><a href="/register">Don't have an account? Register NOW!</a></small>
 {% endblock %}

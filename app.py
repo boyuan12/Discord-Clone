@@ -27,14 +27,19 @@ socketio = SocketIO(app)
 
 users = set()
 
-@app.route("/", methods=["GET"])
-@login_required
+@app.route("/")
 def index():
+    return render_template("index.html")
+
+
+@app.route("/search", methods=["GET"])
+@login_required
+def search():
     if request.args.get("search"):
         results = c.execute(f"SELECT * FROM rooms WHERE name LIKE '%{request.args.get('search')}%'").fetchall()
         return render_template("searched.html", results=results)
     else:
-        return render_template("index.html")
+        return render_template("search.html")
 
 @app.route("/room/<string:room_id>", methods=["GET", "POST"])
 @login_required
@@ -52,10 +57,14 @@ def room(room_id):
             return "You can't explicitly invite people unless it's your own private room"
 
         for i in invite:
+
             user_id = c.execute("SELECT * FROM users WHERE email=:val OR username=:val", {"val": i}).fetchall()
 
             if len(user_id) == 0:
                 return f"{i} not found"
+
+            if len(c.execute("SELECT * FROM user_room WHERE user_id=:u_id AND room_id=r_id", {"u_id": user_id[0][0], "r_id": room_id}).fetchall()) != 0:
+                continue
 
             c.execute("INSERT INTO user_room (user_id, room_id, role) VALUES (:u_id, :r_id, 'user')", {"u_id": user_id[0][0], "r_id": room_id})
             conn.commit()
@@ -157,12 +166,12 @@ def login():
         user = c.execute("SELECT * FROM users WHERE email=:email OR username=:username", {"email": request.form.get("username"), "username": request.form.get("username")}).fetchall()
 
         if len(user) != 1:
-            return "you didn't register"
+            return render_template("login.html", message1="Invalid username/email")
 
         # check the password is same to password hash
         pwhash = user[0][3]
         if check_password_hash(pwhash, request.form.get("password")) == False:
-            return "wrong password"
+            return render_template("login.html", message2="Password doesn't match")
 
         # login the user using session
         session["user_id"] = user[0][0]

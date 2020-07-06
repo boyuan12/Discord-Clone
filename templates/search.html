@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Message
+{% endblock %}
+
+{% block main %}
+    <form action="/" method="GET">
+        <div class="form-group">
+            <label for="search">Search a Public Room</label>
+            <input type="text" class="form-control" id="search" name="search"></input>
+        </div>
+        <button type="submit">Search</button>
+    </form>
+{% endblock %}

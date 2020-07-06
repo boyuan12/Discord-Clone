@@ -1,15 +1,66 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Message
+    Discord Clone
 {% endblock %}
 
 {% block main %}
-    <form action="/" method="GET">
-        <div class="form-group">
-            <label for="search">Search a Public Room</label>
-            <input type="text" class="form-control" id="search" name="search"></input>
-        </div>
-        <button type="submit">Search</button>
-    </form>
+    <!-- <link rel="stylesheet" href="/static/styles.css"> -->
+    <style>
+        @font-face {
+            font-family: 'whitneybold';
+            src: url('/static/whitney-bold-webfont.woff2') format('woff2'),
+                url('/static/whitney-bold-webfont.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            font-family: "whitneybold";
+            background-color: #295ee7;
+        }
+
+        #title {
+            text-align: center;
+            margin-top: 200px;
+            color: white;
+        }
+        button {
+            width: 280px; height: 60px; color: white; background-color: #23272a; border-radius: 20px; border: 1px solid #23272a; outline: none; margin-left: 200px;
+        }
+
+        button:hover {
+            /* background-color: rgba(35, 39, 42, 0.5); */
+            background-color: rgba(35, 39, 42, 0.9);
+            box-shadow: 0 0 5px rgb(71, 75, 77);
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        p {
+            font-size: 20px; margin-left: 280px; margin-right: 280px;
+        }
+
+        #img1 {
+            position: absolute;
+            margin-top: -300px;
+            margin-left: -1300px;
+        }
+
+        #img2 {
+            position: absolute;
+            margin-top: -300px;
+            margin-left: 800px;
+        }
+    </style>
+    <div id="title">
+        <h1>Your place to talk</h1> <br>
+        <p>Whether you’re part of a school club, gaming group, worldwide art community, or just a handful of friends that want to spend time together, Discord (Clone) makes it easy to talk every day and hang out more often.</p>
+        <br> <br> <br>
+        <img src="https://discord.com/assets/e92fcc9ab6e63c1a17e954af347a1f1d.svg" id="img1">
+        <img src="https://discord.com/assets/7b01f72a2054561145b6dd04add417c0.svg" id="img2">
+        <button type="button" id="button" onclick="window.location.replace('/login')">Login to Discord (Clone) </button>
+    </div>
 {% endblock %}
