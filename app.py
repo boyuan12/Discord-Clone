@@ -63,7 +63,7 @@ def room(room_id):
             if len(user_id) == 0:
                 return f"{i} not found"
 
-            if len(c.execute("SELECT * FROM user_room WHERE user_id=:u_id AND room_id=r_id", {"u_id": user_id[0][0], "r_id": room_id}).fetchall()) != 0:
+            if len(c.execute("SELECT * FROM user_room WHERE user_id=:u_id AND room_id=:r_id", {"u_id": user_id[0][0], "r_id": room_id}).fetchall()) != 0:
                 continue
 
             c.execute("INSERT INTO user_room (user_id, room_id, role) VALUES (:u_id, :r_id, 'user')", {"u_id": user_id[0][0], "r_id": room_id})
