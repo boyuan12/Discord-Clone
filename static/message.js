@@ -2,6 +2,10 @@ window.onload = function(e) {
 
     const BASE_URL = "https://discord-clone-flask.herokuapp.com/";
 
+    if (location.protocol === "http:") {
+        window.location.replace(window.location.href.replace("http", "https"))
+    }
+
     function timestamp() {
 
         const months = {
