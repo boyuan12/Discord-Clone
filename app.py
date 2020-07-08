@@ -36,7 +36,7 @@ def index():
 @login_required
 def search():
     if request.args.get("search"):
-        results = c.execute(f"SELECT * FROM rooms WHERE name LIKE '%{request.args.get('search')}%'").fetchall()
+        results = c.execute(f"SELECT * FROM rooms WHERE name LIKE '%{request.args.get('search')}%' AND status='public'").fetchall()
         return render_template("searched.html", results=results)
     else:
         return render_template("search.html")
