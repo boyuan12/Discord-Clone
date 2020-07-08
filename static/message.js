@@ -1,6 +1,6 @@
 window.onload = function(e) {
 
-    const BASE_URL = "http://0.0.0.0:2000/"; // http://discord-clone-flask.herokuapp.com/
+    const BASE_URL = "http://discord-clone-flask.herokuapp.com/";
 
     function timestamp() {
 
