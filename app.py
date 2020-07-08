@@ -25,7 +25,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "secretkey"
 socketio = SocketIO(app)
 
-users = set()
+users = []
 
 @app.route("/")
 def index():
@@ -40,6 +40,7 @@ def search():
         return render_template("searched.html", results=results)
     else:
         return render_template("search.html")
+
 
 @app.route("/room/<string:room_id>", methods=["GET", "POST"])
 @login_required
@@ -87,6 +88,14 @@ def room(room_id):
             private = True
 
         if len(c.execute("SELECT * FROM user_room WHERE room_id=:r_id and user_id=:u_id", {"r_id": room_id, "u_id": session.get("user_id")}).fetchall()) == 0:
+
+            rooms = c.execute("SELECT * FROM user_room WHERE user_id=:u_id", {"u_id": session["user_id"]}).fetchall()
+            rs = []
+            for r in rooms:
+                name = c.execute("SELECT name FROM rooms WHERE room_id=:r_id", {"r_id": r[1]}).fetchall()[0][0]
+                rs.append((name, r[1]))
+            session["rooms"] = rs
+
             c.execute("INSERT INTO user_room (user_id, room_id, role) VALUES (:u_id, :r_id, 'user')", {"r_id": room_id, "u_id": session.get("user_id")})
             conn.commit()
             username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session.get("user_id")}).fetchall()[0][0]
@@ -201,6 +210,7 @@ def create_room():
                 c.execute("INSERT INTO rooms (room_id, name, description, status) VALUES (:r_id, :name, :desc, :status)", {"r_id": room_id, "name": request.form.get("name"), "desc": request.form.get("description"), "status": request.form.get('status')})
                 conn.commit()
                 break
+
         c.execute("INSERT INTO user_room (user_id, room_id, role) VALUES (:u_id, :r_id, 'owner')", {"r_id": room_id, "u_id": session.get("user_id")})
         conn.commit()
         username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session.get("user_id")}).fetchall()[0][0]
@@ -216,15 +226,16 @@ def create_room():
 def exist():
     print(session.get("user_id"), "disconnected!")
     username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
-    users.discard(username)
-    emit("update status", {"user": username, "status": "offline"}, broadcast=True)
+    users.remove(username)
+    if not username in users:
+        emit("update status", {"user": username, "status": "offline"}, broadcast=True)
 
 
 @socketio.on("connect")
 def connect():
     print(str(session.get("user_id")) + " connected!")
     username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
-    users.add(username)
+    users.append(username)
     room = []
     rooms = c.execute("SELECT room_id FROM user_room WHERE user_id=:u_id", {"u_id": session.get("user_id")}).fetchall()
     for r in rooms:
@@ -242,7 +253,7 @@ def api():
             print(u_id)
             if len(c.execute("SELECT room_id FROM user_room WHERE user_id=:u_id AND room_id=:r_id", {"u_id": u_id, "r_id": room_id}).fetchall()) != 0:
                 user.append(i)
-        return jsonify(users=user)
+        return jsonify(users=list(set(user)))
 
     elif request.args.get("api") == "messages":
         room_id = request.args.get("room_id")
@@ -275,7 +286,11 @@ def dm_socket(data):
 @app.route("/@me")
 def me():
     rooms = c.execute("SELECT * FROM user_room WHERE user_id=:u_id", {"u_id": session["user_id"]}).fetchall()
-    return render_template("me.html", rooms=rooms)
+    rs = []
+    for r in rooms:
+        name = c.execute("SELECT name FROM rooms WHERE room_id=:r_id", {"r_id": r[1]}).fetchall()[0][0]
+        rs.append((name, r[1]))
+    return render_template("me.html", rooms=rs)
     # return str(rooms)
 
 if __name__ == "__main__":

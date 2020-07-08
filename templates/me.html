@@ -5,10 +5,25 @@
 {% endblock %}
 
 {% block main %}
-    <h1>@me</h1>
-    <ul>
-        {% for room in rooms %}
-            <li>{{ room[1] }}</li>
-        {% endfor %}
-    </ul>
+    <style>
+        body {
+            background-color: #2f3136;
+            color: #ffffff
+        }
+    </style>
+    <h1 style="text-align: center;">@me</h1>
+    <div class="container">
+        <div class="row">
+            <div class="col-2">
+                {% for room in rooms %}
+                    <div><a href="/room/{{ room[1] }}">{{ room[0] }}</a></div>
+                {% endfor %}
+            </div>
+            <div class="col-2">
+                {% for room in rooms %}
+                    <div><a href="/room/{{ room[1] }}">{{ room[0] }}</a></div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
