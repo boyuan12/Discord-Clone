@@ -61,6 +61,10 @@
         <br> <br> <br>
         <img src="https://discord.com/assets/e92fcc9ab6e63c1a17e954af347a1f1d.svg" id="img1">
         <img src="https://discord.com/assets/7b01f72a2054561145b6dd04add417c0.svg" id="img2">
-        <button type="button" id="button" onclick="window.location.replace('/login')">Login to Discord (Clone) </button>
+        {% if not session["user_id"] %}
+            <button type="button" id="button" onclick="window.location.replace('/login')">Login to Discord (Clone) </button>
+        {% else %}
+            <button type="button" id="button" onclick="window.location.replace('/@me')">Open Discord Clone in Browser</button>
+        {% endif %}
     </div>
 {% endblock %}

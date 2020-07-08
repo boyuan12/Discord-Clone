@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    @me
+{% endblock %}
+
+{% block main %}
+    <h1>@me</h1>
+    <ul>
+        {% for room in rooms %}
+            <li>{{ room[1] }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

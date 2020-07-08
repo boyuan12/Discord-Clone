@@ -3,7 +3,7 @@ window.onload = function(e) {
     // var offset = new Date().getTimezoneOffset();
     // console.log(offset);
 
-    const BASE_URL = "http://discord-clone-flask.herokuapp.com/"
+    const BASE_URL = "http://0.0.0.0:2000/"; // http://discord-clone-flask.herokuapp.com/
 
     function timestamp() {
 
@@ -173,7 +173,10 @@ window.onload = function(e) {
             message.innerHTML = `<small>${utcToLocal(data["messages"][i].timestamp)}</small><h4>${data["messages"][i].author}:</h4><p>${data["messages"][i].message}</p>`
             $(".container").append(message);
         };
-    })
+        var objDiv = document.getElementById("messages");
+        objDiv.scrollTop = objDiv.scrollHeight;
+    });
+
 }
 
 

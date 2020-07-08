@@ -271,5 +271,12 @@ def dm_socket(data):
 
     emit("broadcast dm", {"author": data["author"], "receiver": data["username"], "t": ts, "message": data["message"]})
 
+
+@app.route("/@me")
+def me():
+    rooms = c.execute("SELECT * FROM user_room WHERE user_id=:u_id", {"u_id": session["user_id"]}).fetchall()
+    return render_template("me.html", rooms=rooms)
+    # return str(rooms)
+
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=2000, debug=True)
