@@ -273,7 +273,7 @@ def api():
 @app.route("/dm", methods=["GET"])
 @login_required
 def dm():
-    messages = c.execute("SELECT * FROM messages WHERE room=:room", {"room": session.get('user_id')}).fetchall()
+    messages = c.execute("SELECT * FROM messages WHERE room=:room", {"room": str(session.get('user_id'))}).fetchall()
     username = c.execute("SELECT username FROM users WHERE user_id=:u_id", {"u_id": session["user_id"]}).fetchall()[0][0]
     return render_template("dm.html", messages=messages, username=username)
 
