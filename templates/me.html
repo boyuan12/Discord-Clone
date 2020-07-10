@@ -5,6 +5,21 @@
 {% endblock %}
 
 {% block main %}
+    <script>
+        function getRoom(code) {
+            if (document.getElementById("room-iframe") !== null) {
+                document.getElementById("room-iframe").setAttribute("src", `/room/${code}`)
+            } else {
+                var iframe = document.createElement("iframe")
+                iframe.setAttribute("src", `/room/${code}`)
+                iframe.setAttribute("width", "900px")
+                iframe.setAttribute("height", "570px")
+                iframe.setAttribute("id", "room-iframe")
+                iframe.setAttribute("frameborder", "0")
+                document.getElementById("room").appendChild(iframe)
+            };
+        }
+    </script>
     <style>
         body {
             background-color: #2f3136;
@@ -14,16 +29,17 @@
     <h1 style="text-align: center;">@me</h1>
     <div class="container">
         <div class="row">
-            <div class="col-2">
+            <!-- <div class="col-2">
                 {% for room in rooms %}
                     <div><a href="/room/{{ room[1] }}">{{ room[0] }}</a></div>
                 {% endfor %}
-            </div>
-            <div class="col-2">
+            </div> -->
+            <div class="col-2" style="overflow-y:auto;">
                 {% for room in rooms %}
-                    <div><a href="/room/{{ room[1] }}">{{ room[0] }}</a></div>
+                    <div><a href="#" onclick="getRoom('{{ room[1] }}')">{{ room[0] }}</a></div>
                 {% endfor %}
             </div>
+            <div class="col-8" id="room" height="500px"></div>
         </div>
     </div>
 {% endblock %}

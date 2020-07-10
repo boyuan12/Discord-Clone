@@ -14,7 +14,7 @@
         <button type="submit" id="dmButton">Send the Message</button>
     </form>
     <h1>All Messages Received:</h1>
-    <ul id="messages">
+    <ul id="messages" class="container">
         {% for message in messages %}
             <li>{{ message }}</li>
         {% endfor %}

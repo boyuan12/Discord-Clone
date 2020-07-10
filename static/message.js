@@ -1,10 +1,11 @@
 window.onload = function(e) {
 
-    const BASE_URL = "https://discord-clone-flask.herokuapp.com/";
-
     if (location.protocol === "http:") {
         window.location.replace(window.location.href.replace("http", "https"))
     }
+
+    const BASE_URL = "https://discord-clone-flask.herokuapp.com/";
+    // const BASE_URL = "http://0.0.0.0:2000/";
 
     function timestamp() {
 
@@ -159,7 +160,7 @@ window.onload = function(e) {
                 document.getElementById("users").appendChild(span);
             }
         }
-      });
+    });
 
     fetch(`${BASE_URL}/api?room_id=${room_id}&api=messages`, {
         method: "GET",

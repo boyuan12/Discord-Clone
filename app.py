@@ -128,7 +128,6 @@ def message_display(data):
     markdowns = "<br>".join(markdowns)
     # print(markdowns)
     c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": markdowns, "a": user, "r": data["room_id"], "t": ts})
-    print(ts)
     conn.commit()
     emit("show message", {"message": markdowns, "timestamp": ts, "name": user, "room_id": data["room_id"]}, broadcast=True)
 
@@ -267,19 +266,17 @@ def api():
 @app.route("/dm", methods=["GET"])
 @login_required
 def dm():
-    messages = c.execute("SELECT * FROM messages WHERE room=:room", {"room": f"user-{session.get('user_id')}"}).fetchall()
+    messages = c.execute("SELECT * FROM messages WHERE room=:room", {"room": session.get('user_id')}).fetchall()
     username = c.execute("SELECT username FROM users WHERE user_id=:u_id", {"u_id": session["user_id"]}).fetchall()[0][0]
-
     return render_template("dm.html", messages=messages, username=username)
+
 
 @socketio.on("dm")
 def dm_socket(data):
     ts = timestamp()
     user_id = c.execute("SELECT * FROM users WHERE username=:name", {"name": data["username"]}).fetchall()[0][0]
-
-    c.execute("INSERT INTO messages (author, message, room, timestamp) VALUES (:a, :m, :r, :t)", {"a": data["author"], "m": data["message"], "r": f"user-{user_id}", "t": ts})
+    c.execute("INSERT INTO messages (author, message, room, timestamp) VALUES (:a, :m, :r, :t)", {"a": data["author"], "m": data["message"], "r": user_id, "t": ts})
     conn.commit()
-
     emit("broadcast dm", {"author": data["author"], "receiver": data["username"], "t": ts, "message": data["message"]})
 
 

@@ -20,7 +20,10 @@ window.onload = function(e) {
     socket.on("broadcast dm", data => {
         console.log("dm received")
         if (data["receiver"] == document.getElementById("sender").value) {
-            console.log(data["message"]);
+            console.log(data);
+            var message = document.createElement("SPAN");
+            message.innerHTML = `<small>${(data["t"])}</small><h4>${data["author"]}:</h4><p>${data["message"]}</p>`
+            $(".container").append(message);
         }
     })
 }
