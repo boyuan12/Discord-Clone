@@ -15,6 +15,13 @@ if not os.getenv('DATABASE_URL'):
     conn = sqlite3.connect("db.sqlite3", check_same_thread=False)
     c = conn.cursor()
 else:
+    import sentry_sdk
+    from sentry_sdk.integrations.flask import FlaskIntegration
+
+    sentry_sdk.init(
+        dsn=os.getenv("sentry_dsn"),
+        integrations=[FlaskIntegration()]
+    )
     engine = create_engine(os.getenv("DATABASE_URL"))
     db = scoped_session(sessionmaker(bind=engine))
     conn = db()

@@ -24,3 +24,4 @@ termcolor
 requests
 psycopg2-binary
 Markdown
+sentry-sdk[flask]==0.16.1
