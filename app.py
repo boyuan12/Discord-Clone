@@ -299,6 +299,7 @@ def me():
 
 
 @app.route("/delete/<string:r_id>")
+@login_required
 def delete_room(r_id):
     c.execute("DELETE FROM messages WHERE room=:r_id", {"r_id": r_id})
     c.execute("DELETE FROM rooms WHERE room_id=:r_id", {"r_id": r_id})
