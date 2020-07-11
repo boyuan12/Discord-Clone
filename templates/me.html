@@ -38,6 +38,8 @@
                 {% for room in rooms %}
                     {% if room[2] == "owner" %}
                         <div><a href="#" onclick="getRoom('{{ room[1] }}')">{{ room[0] }}</a>&nbsp;<a href="/delete/{{ room[1] }}"><i class="fas fa-trash" style="color: red;"></i></a></div>
+                    {% else %}
+                        <div><a href="#" onclick="getRoom('{{ room[1] }}')">{{ room[0] }}</a></div>
                     {% endif %}
                 {% endfor %}
             </div>
