@@ -293,9 +293,19 @@ def me():
     rs = []
     for r in rooms:
         name = c.execute("SELECT name FROM rooms WHERE room_id=:r_id", {"r_id": r[1]}).fetchall()[0][0]
-        rs.append((name, r[1]))
+        status = c.execute("SELECT role FROM user_room WHERE room_id=:r_id", {"r_id": r[1]}).fetchall()[0][0]
+        rs.append((name, r[1], status))
     return render_template("me.html", rooms=rs)
     # return str(rooms)
+
+
+@app.route("/delete/<string:r_id>")
+def delete_room(r_id):
+    c.execute("DELETE FROM messages WHERE room=:r_id", {"r_id": r_id})
+    c.execute("DELETE FROM rooms WHERE room_id=:r_id", {"r_id": r_id})
+    c.execute("DELETE FROM user_room WHERE room_id=:r_id", {"r_id": r_id})
+    conn.commit()
+    return redirect("/@me")
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=2000, debug=True)
