@@ -80,6 +80,7 @@ def room(room_id):
         return "successfully invited all people on your list!"
 
     else:
+        right = None
         private = False
         room = c.execute("SELECT * FROM rooms WHERE room_id=:r_id", {"r_id": room_id}).fetchall()
 
@@ -93,6 +94,7 @@ def room(room_id):
                 return "404"
 
             private = True
+            right = access[0][2]
 
         if len(c.execute("SELECT * FROM user_room WHERE room_id=:r_id and user_id=:u_id", {"r_id": room_id, "u_id": session.get("user_id")}).fetchall()) == 0:
 
@@ -118,7 +120,7 @@ def room(room_id):
         for user in users:
             username = c.execute("SELECT username FROM users WHERE user_id=:u_id", {"u_id": user[0]}).fetchall()[0][0]
             usernames.append(username)
-        return render_template("message.html", messages=messages, private=private, room_id=room_id, users=usernames)
+        return render_template("message.html", messages=messages, private=private, room_id=room_id, users=usernames, right=right)
 
 
 @socketio.on("broadcast message")

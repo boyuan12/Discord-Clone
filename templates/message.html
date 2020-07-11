@@ -21,7 +21,7 @@
     </style>
     <div class="row">
         <div class="col-9">
-            {% if private == True %}
+            {% if private == True and right == "owner" %}
                 <form method="POST" action="/room/{{ room_id }}">
                     <label for="invite">Invite People to join your private room (seperate by a single comma (,))</label>
                     <textarea class="form-control" id="invite" name="invite" row="3"></textarea>
