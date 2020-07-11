@@ -1,8 +1,8 @@
 window.onload = function(e) {
 
-    if (location.protocol === "http:") {
-        window.location.replace(window.location.href.replace("http", "https"))
-    }
+    // if (location.protocol === "http:") {
+    //     window.location.replace(window.location.href.replace("http", "https"))
+    // }
 
     const BASE_URL = "https://discord-clone-flask.herokuapp.com/";
     // const BASE_URL = "http://0.0.0.0:2000/";

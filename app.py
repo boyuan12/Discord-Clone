@@ -293,8 +293,7 @@ def me():
     rs = []
     for r in rooms:
         name = c.execute("SELECT name FROM rooms WHERE room_id=:r_id", {"r_id": r[1]}).fetchall()[0][0]
-        status = c.execute("SELECT role FROM user_room WHERE room_id=:r_id", {"r_id": r[1]}).fetchall()[0][0]
-        rs.append((name, r[1], status))
+        rs.append((name, r[1], r[2]))
     return render_template("me.html", rooms=rs)
     # return str(rooms)
 
