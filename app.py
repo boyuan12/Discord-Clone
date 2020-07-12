@@ -130,7 +130,7 @@ def message_display(data):
         user = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
     else:
         user = "unknown"
-    if data["message"] != "" and True in [not s or s.isspace() for s in data["messages"]]:
+    if data["message"] != "" and True in [not s or s.isspace() for s in data["message"]]:
 
         messages = data["message"].split("\n")
         markdowns = []
