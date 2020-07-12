@@ -130,15 +130,17 @@ def message_display(data):
         user = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
     else:
         user = "unknown"
-    messages = data["message"].split("\n")
-    markdowns = []
-    for m in messages:
-        markdowns.append(markdown(m))
-    markdowns = "<br>".join(markdowns)
-    # print(markdowns)
-    c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": markdowns, "a": user, "r": data["room_id"], "t": ts})
-    conn.commit()
-    emit("show message", {"message": markdowns, "timestamp": ts, "name": user, "room_id": data["room_id"]}, broadcast=True)
+    if data["message"] != "" and True in [not s or s.isspace() for s in data["messages"]]:
+
+        messages = data["message"].split("\n")
+        markdowns = []
+        for m in messages:
+            markdowns.append(markdown(m))
+        markdowns = "<br>".join(markdowns)
+        # print(markdowns)
+        c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": markdowns, "a": user, "r": data["room_id"], "t": ts})
+        conn.commit()
+        emit("show message", {"message": markdowns, "timestamp": ts, "name": user, "room_id": data["room_id"]}, broadcast=True)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -303,6 +305,9 @@ def me():
 @app.route("/delete/<string:r_id>")
 @login_required
 def delete_room(r_id):
+    status = c.execute("SELECT * FROM user_room WHERE user_id=:u_id AND room_id=:r_id").fetchall()
+    if len(status) == 0 or status[0][2] != "owner":
+        return "you are not an owner, can't delete this room"
     c.execute("DELETE FROM messages WHERE room=:r_id", {"r_id": r_id})
     c.execute("DELETE FROM rooms WHERE room_id=:r_id", {"r_id": r_id})
     c.execute("DELETE FROM user_room WHERE room_id=:r_id", {"r_id": r_id})

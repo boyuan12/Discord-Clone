@@ -4,7 +4,7 @@ window.onload = function(e) {
     //     window.location.replace(window.location.href.replace("http", "https"))
     // }
 
-    const BASE_URL = "https://discord-clone-flask.herokuapp.com/";
+    const BASE_URL = location.origin;
     // const BASE_URL = "http://0.0.0.0:2000/";
 
     function timestamp() {
@@ -77,12 +77,18 @@ window.onload = function(e) {
     var socket = io.connect(location.protocol + "//" + document.domain + ":" + location.port);
 
     socket.on("connect", () => {
+        var textArea = document.getElementById("message");
+        textArea.addEventListener("input", () => {
+            console.log("typpppiiiing")
+            socket.emit("typing", {"room_id": room_id});
+        })
         var button = document.getElementById("sendMessageButton");
         button.onclick = () => {
             var message = document.getElementById("message").value;
             document.getElementById("message").value = " ";
-            console.log(room_id)
-            socket.emit("broadcast message", {"message": message, "room_id": room_id});
+            if (message.length !== 0) {
+                socket.emit("broadcast message", {"message": message, "room_id": room_id})
+            };
         }
         // socket.emit("connect")
     });

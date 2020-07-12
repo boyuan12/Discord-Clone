@@ -9,6 +9,7 @@
         if (location.protocol === "http:") {
             window.location.replace(window.location.href.replace("http", "https"))
         }
+
         function getRoom(code) {
             if (document.getElementById("room-iframe") !== null) {
                 document.getElementById("room-iframe").setAttribute("src", `/room/${code}`)
