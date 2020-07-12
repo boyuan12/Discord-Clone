@@ -11,6 +11,12 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from helpers import *
 
+app = Flask(__name__)
+app.config["SECRET_KEY"] = "secretkey"
+socketio = SocketIO(app)
+
+users = []
+
 if not os.getenv('DATABASE_URL'):
     conn = sqlite3.connect("db.sqlite3", check_same_thread=False)
     c = conn.cursor()
@@ -27,12 +33,6 @@ else:
     conn = db()
     c = conn
 
-
-app = Flask(__name__)
-app.config["SECRET_KEY"] = "secretkey"
-socketio = SocketIO(app)
-
-users = []
 
 @app.route("/")
 def index():
@@ -130,8 +130,8 @@ def message_display(data):
         user = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
     else:
         user = "unknown"
-    if data["message"] != "" and True in [not s or s.isspace() for s in data["message"]]:
 
+    if data["message"] != "" or True in [not s or s.isspace() for s in data["message"]]:
         messages = data["message"].split("\n")
         markdowns = []
         for m in messages:
@@ -244,6 +244,9 @@ def exist():
 @socketio.on("connect")
 def connect():
     print(str(session.get("user_id")) + " connected!")
+    if session.get("user_id") == None:
+        print("hi")
+        return False
     username = c.execute("SELECT username FROM users WHERE user_id=:id", {"id": session["user_id"]}).fetchall()[0][0]
     users.append(username)
     room = []
@@ -315,4 +318,4 @@ def delete_room(r_id):
     return redirect("/@me")
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=2000, debug=True)
+    socketio.run(app) # , host="0.0.0.0", port=2000, debug=True
