@@ -18,3 +18,5 @@ pip install Flask Flask-SocketiO
 ## Features
 ### Authentication
 Authentication is a really most 
+Done by Kevin Yang,
+attempted to change ui
