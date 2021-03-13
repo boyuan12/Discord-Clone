@@ -122,7 +122,6 @@ def room(room_id):
             usernames.append(username)
         return render_template("message.html", messages=messages, private=private, room_id=room_id, users=usernames, right=right)
 
-
 @socketio.on("broadcast message")
 def message_display(data):
     ts = timestamp()
@@ -141,7 +140,6 @@ def message_display(data):
         c.execute("INSERT INTO messages (message, author, room, timestamp) VALUES (:m, :a, :r, :t)", {"m": markdowns, "a": user, "r": data["room_id"], "t": ts})
         conn.commit()
         emit("show message", {"message": markdowns, "timestamp": ts, "name": user, "room_id": data["room_id"]}, broadcast=True)
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -172,7 +170,6 @@ def register():
     else:
         return render_template("register.html")
 
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -201,13 +198,11 @@ def login():
     else:
         return render_template("login.html")
 
-
 @app.route("/logout")
 @login_required
 def logout():
     session.clear()
     return redirect(url_for("login"))
-
 
 @app.route("/create-room", methods=["GET", "POST"])
 @login_required
@@ -230,7 +225,6 @@ def create_room():
         return redirect(f"/room/{room_id}")
     else:
         return render_template("create-room.html")
-
 
 @socketio.on("disconnect")
 def exist():
@@ -255,7 +249,6 @@ def connect():
         room.append(r[0])
     emit("update status", {"user": username, "status": "online", "room_id": room}, broadcast=True)
 
-
 @app.route("/api")
 def api():
     if request.args.get("api") == "users":
@@ -267,7 +260,6 @@ def api():
             if len(c.execute("SELECT room_id FROM user_room WHERE user_id=:u_id AND room_id=:r_id", {"u_id": u_id, "r_id": room_id}).fetchall()) != 0:
                 user.append(i)
         return jsonify(users=list(set(user)))
-
     elif request.args.get("api") == "messages":
         room_id = request.args.get("room_id")
         messages = []
@@ -276,14 +268,12 @@ def api():
             messages.append({"author": d[1], "message": d[2], "timestamp": d[4]})
         return jsonify(messages=messages)
 
-
 @app.route("/dm", methods=["GET"])
 @login_required
 def dm():
     messages = c.execute("SELECT * FROM messages WHERE room=:room", {"room": str(session.get('user_id'))}).fetchall()
     username = c.execute("SELECT username FROM users WHERE user_id=:u_id", {"u_id": session["user_id"]}).fetchall()[0][0]
     return render_template("dm.html", messages=messages, username=username)
-
 
 @socketio.on("dm")
 def dm_socket(data):
@@ -292,7 +282,6 @@ def dm_socket(data):
     c.execute("INSERT INTO messages (author, message, room, timestamp) VALUES (:a, :m, :r, :t)", {"a": data["author"], "m": data["message"], "r": user_id, "t": ts})
     conn.commit()
     emit("broadcast dm", {"author": data["author"], "receiver": data["username"], "t": ts, "message": data["message"]})
-
 
 @app.route("/@me")
 def me():
@@ -303,7 +292,6 @@ def me():
         rs.append((name, r[1], r[2]))
     return render_template("me.html", rooms=rs)
     # return str(rooms)
-
 
 @app.route("/delete/<string:r_id>")
 @login_required
