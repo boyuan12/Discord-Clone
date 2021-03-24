@@ -17,4 +17,6 @@ pip install Flask Flask-SocketiO
 
 ## Features
 ### Authentication
-Authentication is a really most 
+Authentication is a really most
+
+made by Zimin
