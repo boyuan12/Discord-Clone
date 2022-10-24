@@ -319,3 +319,8 @@ def delete_room(r_id):
 
 if __name__ == "__main__":
     socketio.run(app) # , host="0.0.0.0", port=2000, debug=True
+                           
+                            
+@app.route("/robot")
+def robot():
+    return render_template("captcha2.html")
